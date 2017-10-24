@@ -1,0 +1,8 @@
+exclude:
+        - /apps/top_block.py
+        - /docs/doxygen/.*
+        - /python/.*
+component_depth: 1
+languages:
+        - cpp
+        - python
