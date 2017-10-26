@@ -28,6 +28,8 @@ link_directories(${Boost_LIBRARY_DIRS})
 list(APPEND dvbt_rx_sources
     sync_cc_impl.cc
     myConfig_t.cc
+    demap_impl.cc
+    gpu_viterbi_impl.cc
 )
 
 set(dvbt_rx_sources "${dvbt_rx_sources}" PARENT_SCOPE)
@@ -37,7 +39,7 @@ if(NOT dvbt_rx_sources)
 endif(NOT dvbt_rx_sources)
 
 add_library(gnuradio-dvbt_rx SHARED ${dvbt_rx_sources})
-target_link_libraries(gnuradio-dvbt_rx ${Boost_LIBRARIES} ${GNURADIO_ALL_LIBRARIES} fftw3f)
+target_link_libraries(gnuradio-dvbt_rx ${Boost_LIBRARIES} ${GNURADIO_ALL_LIBRARIES} fftw3f viterbi_002)
 set_target_properties(gnuradio-dvbt_rx PROPERTIES DEFINE_SYMBOL "gnuradio_dvbt_rx_EXPORTS")
 
 if(APPLE)
@@ -65,6 +67,8 @@ include_directories(${CPPUNIT_INCLUDE_DIRS})
 list(APPEND test_dvbt_rx_sources
     ${CMAKE_CURRENT_SOURCE_DIR}/test_dvbt_rx.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/qa_dvbt_rx.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/qa_gpu_viterbi.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/qa_demap.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/qa_sync_cc.cc
 )
 

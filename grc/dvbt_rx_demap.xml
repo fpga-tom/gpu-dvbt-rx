@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<block>
+  <name>demap</name>
+  <key>dvbt_rx_demap</key>
+  <category>dvbt_rx</category>
+  <import>import dvbt_rx</import>
+  <make>dvbt_rx.demap()</make>
+
+
+  <!-- Make one 'sink' node per input. Sub-nodes:
+       * name (an identifier for the GUI)
+       * type
+       * vlen
+       * optional (set to 1 for optional inputs) -->
+  <sink>
+    <name>eq</name>
+    <type>complex</type>
+    <vlen>6817</vlen>
+  </sink>
+  
+  <sink>
+    <name>fft</name>
+    <type>complex</type>
+    <vlen>8192</vlen>
+  </sink>
+
+  <source>
+    <name>out</name>
+    <type>byte</type>
+    <vlen>36288</vlen>
+  </source>
+</block>

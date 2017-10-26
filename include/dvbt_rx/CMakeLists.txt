@@ -23,5 +23,7 @@
 install(FILES
     api.h
     sync_cc.h
-    myConfig_t.h DESTINATION include/dvbt_rx
+    myConfig_t.h
+    demap.h
+    gpu_viterbi.h DESTINATION include/dvbt_rx
 )

@@ -27,12 +27,16 @@
 
 #include "qa_dvbt_rx.h"
 #include "qa_sync_cc.h"
+#include "qa_demap.h"
+#include "qa_gpu_viterbi.h"
 
 CppUnit::TestSuite *
 qa_dvbt_rx::suite()
 {
   CppUnit::TestSuite *s = new CppUnit::TestSuite("dvbt_rx");
   s->addTest(gr::dvbt_rx::qa_sync_cc::suite());
+  s->addTest(gr::dvbt_rx::qa_demap::suite());
+  s->addTest(gr::dvbt_rx::qa_gpu_viterbi::suite());
 
   return s;
 }

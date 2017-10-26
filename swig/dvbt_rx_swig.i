@@ -10,9 +10,15 @@
 %{
 #include "dvbt_rx/sync_cc.h"
 #include "dvbt_rx/myConfig_t.h"
+#include "dvbt_rx/demap.h"
+#include "dvbt_rx/gpu_viterbi.h"
 %}
 
 
 %include "dvbt_rx/sync_cc.h"
 GR_SWIG_BLOCK_MAGIC2(dvbt_rx, sync_cc);
 %include "dvbt_rx/myConfig_t.h"
+%include "dvbt_rx/demap.h"
+GR_SWIG_BLOCK_MAGIC2(dvbt_rx, demap);
+%include "dvbt_rx/gpu_viterbi.h"
+GR_SWIG_BLOCK_MAGIC2(dvbt_rx, gpu_viterbi);
