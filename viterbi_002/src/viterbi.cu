@@ -16,6 +16,8 @@
 #define NUM_D_BLOCKS 378
 #define NUM_D_THREADS 96
 #define NUM_D_BITS 756
+#define NUM_L (7*5)
+#define BLOCK_LEN (TRACEBACK + 2*NUM_L)
 
 __constant__ const char outputs[NUM_STATES][NUM_INPUT_SYMBOLS] = { { 0, 3 }, {
 		3, 0 }, { 1, 2 }, { 2, 1 }, { 0, 3 }, { 3, 0 }, { 1, 2 }, { 2, 1 }, { 3,
@@ -35,18 +37,18 @@ typedef struct {
 } pm_t;
 
 __global__ void calc_bm(char *encData,
-		pm_t (*pm)[NUM_BLOCKS][TRACEBACK][NUM_STATES]) {
+		pm_t (*pm)[NUM_BLOCKS][BLOCK_LEN][NUM_STATES]) {
 	int state = threadIdx.x;
 	int block = blockIdx.x;
 
 	int prevState = (state & (~32U)) << 1;
 	int prevSymbol = (state >> 5) & 1;
 
-	int offset = block * (TRACEBACK);
+	int offset = block * (BLOCK_LEN);
 	unsigned int pm0 = 0;
 	unsigned int pm1 = 0;
 
-	for (int tms = 0; tms < (TRACEBACK); tms++) {
+	for (int tms = 0; tms < (BLOCK_LEN); tms++) {
 		int _tms = tms + offset;
 
 		unsigned char data = encData[_tms];
@@ -94,24 +96,28 @@ __global__ void merge(pm_t (*pm)[NUM_BLOCKS][TRACEBACK][NUM_STATES]) {
 }
 
 __global__ void traceback(char *decData,
-		pm_t (*pm)[NUM_BLOCKS][TRACEBACK][NUM_STATES]) {
+		pm_t (*pm)[NUM_BLOCKS][BLOCK_LEN][NUM_STATES]) {
 
 	int block = blockIdx.x;
 	int offset = block * (TRACEBACK);
 
-	unsigned int min = 0xffffffff;
 	unsigned int minIdx = 0;
-	int tms = TRACEBACK - 1;
-	for (int i = 0; i < NUM_STATES; i++) {
-		unsigned int w = (*pm)[block][tms][i].w;
-		if (min > w) {
-			min = w;
-			minIdx = i;
-		}
+//	unsigned int min = 0xffffffff;
+//	int tms = BLOCK_LEN - 1;
+//	for (int i = 0; i < NUM_STATES; i++) {
+//		unsigned int w = (*pm)[block][tms][i].w;
+//		if (min > w) {
+//			min = w;
+//			minIdx = i;
+//		}
+//	}
+
+	for (int _tms = BLOCK_LEN - 1; _tms >= BLOCK_LEN - NUM_L; _tms--) {
+			minIdx = (*pm)[block][_tms][minIdx].prev;
 	}
 
-	for (int _tms = TRACEBACK - 1; _tms >= 0; _tms--) {
-		decData[_tms + offset] = (minIdx >> 5) & 1;
+	for (int _tms = BLOCK_LEN - NUM_L - 1; _tms >= NUM_L; _tms--) {
+		decData[_tms + offset - NUM_L] = (minIdx >> 5) & 1;
 		minIdx = (*pm)[block][_tms][minIdx].prev;
 	}
 }
@@ -135,7 +141,7 @@ __global__ void deint_bit(const char* tmp, char* result, int* bit_table) {
 	result[bit_table[inner] - 1 + outer * 756] = tmp[inner + outer * 756];
 }
 
-static pm_t (*pm)[NUM_BLOCKS][TRACEBACK][NUM_STATES];
+static pm_t (*pm)[NUM_BLOCKS][BLOCK_LEN][NUM_STATES];
 static char *encData;
 static char *decData;
 static char *deint_tmp;
@@ -173,8 +179,8 @@ void gpu_deint_free() {
 void gpu_viterbi_init() {
 	cudaStreamCreate(&viterbi_stream);
 	cudaMalloc(&pm,
-	NUM_BLOCKS * (TRACEBACK) * NUM_STATES * sizeof(pm_t));
-	cudaMalloc(&encData, (TRACEBACK) * NUM_BLOCKS);
+	NUM_BLOCKS * (BLOCK_LEN) * NUM_STATES * sizeof(pm_t));
+	cudaMalloc(&encData, (BLOCK_LEN) * NUM_BLOCKS);
 	cudaMalloc(&decData, TRACEBACK * NUM_BLOCKS);
 }
 
@@ -187,28 +193,31 @@ void gpu_viterbi_free() {
 
 void gpu_viterbi_decode(const char* data, char* output) {
 
-	char encData_tmp[(TRACEBACK) * NUM_BLOCKS];
+	static char encData_tmp[(BLOCK_LEN) * NUM_BLOCKS] = {0,};
 	char decData_tmp[TRACEBACK * NUM_BLOCKS];
 
 	for (int b = 0; b < NUM_BLOCKS; b++) {
-		for (int i = 0; i < TRACEBACK; i++) {
+		for (int i = 0; i < TRACEBACK + NUM_L; i++) {
 
 			int d = (data[(b * TRACEBACK + i) * 2] & 1) << 1
 					| (data[(b * TRACEBACK + i) * 2 + 1] & 1);
 			d |= (data[(b * TRACEBACK + i) * 2] & 2) << 2
 					| (data[(b * TRACEBACK + i) * 2 + 1] & 2) << 1;
 
-			encData_tmp[b * (TRACEBACK) + i] = d;
+			encData_tmp[b * (BLOCK_LEN) + i + NUM_L] = d;
+		}
+		if (b > 0) {
+//			memcpy(&encData_tmp[(b-1)*BLOCK_LEN + TRACEBACK + NUM_L], &encData_tmp[b*BLOCK_LEN + NUM_L], NUM_L);
+			memcpy(&encData_tmp[(b) * (BLOCK_LEN)], &encData_tmp[(b - 1)
+						* (BLOCK_LEN) + TRACEBACK], NUM_L);
 		}
 	}
 
-	cudaMemcpy(encData, encData_tmp, (TRACEBACK) * NUM_BLOCKS,
+	cudaMemcpy(encData, encData_tmp, (BLOCK_LEN) * NUM_BLOCKS,
 			cudaMemcpyHostToDevice);
-	for (int i = 0; i < NUM_BLOCKS; i++) {
-		calc_bm<<<dim3(1), dim3(NUM_STATES), 0, viterbi_stream>>>(encData, pm,
-				i);
-		cudaStreamSynchronize(viterbi_stream);
-	}
+	calc_bm<<<dim3(NUM_BLOCKS), dim3(NUM_STATES), 0, viterbi_stream>>>(encData,
+			pm);
+	cudaStreamSynchronize(viterbi_stream);
 //	merge<<<dim3(1), dim3(NUM_STATES), 0, viterbi_stream>>>(pm);
 //	cudaStreamSynchronize(viterbi_stream);
 	traceback<<<NUM_BLOCKS, 1, 0, viterbi_stream>>>(decData, pm);
@@ -216,6 +225,8 @@ void gpu_viterbi_decode(const char* data, char* output) {
 
 	cudaMemcpy(decData_tmp, decData, TRACEBACK * NUM_BLOCKS,
 			cudaMemcpyDeviceToHost);
+
+	memcpy(encData_tmp, &encData_tmp[(NUM_BLOCKS-1)*BLOCK_LEN + TRACEBACK], NUM_L);
 
 	int count = 0;
 	for (int i = 0; i < TRACEBACK * NUM_BLOCKS; i += 8) {
