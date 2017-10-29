@@ -25,5 +25,7 @@ install(FILES
     sync_cc.h
     myConfig_t.h
     demap.h
-    gpu_viterbi.h DESTINATION include/dvbt_rx
+    gpu_viterbi.h
+    descrambler.h
+    superframe.h DESTINATION include/dvbt_rx
 )

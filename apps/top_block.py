@@ -3,7 +3,7 @@
 ##################################################
 # GNU Radio Python Flow Graph
 # Title: Top Block
-# Generated: Wed Oct 25 19:47:00 2017
+# Generated: Sun Oct 29 12:20:07 2017
 ##################################################
 
 if __name__ == '__main__':
@@ -18,6 +18,7 @@ if __name__ == '__main__':
 
 from PyQt4 import Qt
 from gnuradio import blocks
+from gnuradio import dtv
 from gnuradio import eng_notation
 from gnuradio import gr
 from gnuradio.eng_option import eng_option
@@ -61,17 +62,28 @@ class top_block(gr.top_block, Qt.QWidget):
         # Blocks
         ##################################################
         self.dvbt_rx_sync_cc_0 = dvbt_rx.sync_cc()
+        self.dvbt_rx_superframe_0 = dvbt_rx.superframe()
         self.dvbt_rx_gpu_viterbi_0 = dvbt_rx.gpu_viterbi()
         self.dvbt_rx_demap_0 = dvbt_rx.demap()
-        self.blocks_null_sink_0_0 = blocks.null_sink(gr.sizeof_char*18144)
+        self.dtv_dvbt_reed_solomon_dec_0 = dtv.dvbt_reed_solomon_dec(2, 8, 0x11d, 255, 239, 8, 51, 8)
+        self.dtv_dvbt_energy_descramble_0 = dtv.dvbt_energy_descramble(8)
+        self.dtv_dvbt_convolutional_deinterleaver_0 = dtv.dvbt_convolutional_deinterleaver(136, 12, 17)
+        self.blocks_vector_to_stream_0 = blocks.vector_to_stream(gr.sizeof_char*1, 3024)
         self.blocks_file_source_0 = blocks.file_source(gr.sizeof_gr_complex*10240, "/tmp/dvb_res_today.cfile", False)
+        self.blocks_file_sink_0 = blocks.file_sink(gr.sizeof_char*1, "/tmp/rx.ts", False)
+        self.blocks_file_sink_0.set_unbuffered(False)
 
         ##################################################
         # Connections
         ##################################################
         self.connect((self.blocks_file_source_0, 0), (self.dvbt_rx_sync_cc_0, 0))    
+        self.connect((self.blocks_vector_to_stream_0, 0), (self.dvbt_rx_superframe_0, 0))    
+        self.connect((self.dtv_dvbt_convolutional_deinterleaver_0, 0), (self.dtv_dvbt_reed_solomon_dec_0, 0))    
+        self.connect((self.dtv_dvbt_energy_descramble_0, 0), (self.blocks_file_sink_0, 0))    
+        self.connect((self.dtv_dvbt_reed_solomon_dec_0, 0), (self.dtv_dvbt_energy_descramble_0, 0))    
         self.connect((self.dvbt_rx_demap_0, 0), (self.dvbt_rx_gpu_viterbi_0, 0))    
-        self.connect((self.dvbt_rx_gpu_viterbi_0, 0), (self.blocks_null_sink_0_0, 0))    
+        self.connect((self.dvbt_rx_gpu_viterbi_0, 0), (self.blocks_vector_to_stream_0, 0))    
+        self.connect((self.dvbt_rx_superframe_0, 0), (self.dtv_dvbt_convolutional_deinterleaver_0, 0))    
         self.connect((self.dvbt_rx_sync_cc_0, 1), (self.dvbt_rx_demap_0, 0))    
         self.connect((self.dvbt_rx_sync_cc_0, 0), (self.dvbt_rx_demap_0, 1))    
 

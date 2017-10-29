@@ -26,6 +26,10 @@
 #include <fftw3.h>
 #include <volk/volk.h>
 
+void gpu_deint_init();
+void gpu_deint_free();
+void gpu_deinterleave(const char* data, char* output, int frame);
+
 namespace gr {
   namespace dvbt_rx {
 

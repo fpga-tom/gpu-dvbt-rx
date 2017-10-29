@@ -18,40 +18,39 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef INCLUDED_DVBT_RX_GPU_VITERBI_IMPL_H
-#define INCLUDED_DVBT_RX_GPU_VITERBI_IMPL_H
 
-#include <dvbt_rx/gpu_viterbi.h>
-#include <dvbt_rx/myConfig_t.h>
-#include <viterbi.h>
+#ifndef INCLUDED_DVBT_RX_SUPERFRAME_H
+#define INCLUDED_DVBT_RX_SUPERFRAME_H
+
+#include <dvbt_rx/api.h>
+#include <gnuradio/block.h>
 
 namespace gr {
   namespace dvbt_rx {
 
-    class gpu_viterbi_impl : public gpu_viterbi
+    /*!
+     * \brief <+description of block+>
+     * \ingroup dvbt_rx
+     *
+     */
+    class DVBT_RX_API superframe : virtual public gr::block
     {
-     private:
-    	myConfig_t config;
-    	const unsigned char d_puncture[4] = { 1,1, 0, 1 };
-    	const myInteger_t d_k = 2;
-    	const myInteger_t d_n = 3;
-    	const myInteger_t noi = 3024; // number of output items
-
      public:
-      gpu_viterbi_impl();
-      ~gpu_viterbi_impl();
+      typedef boost::shared_ptr<superframe> sptr;
 
-      // Where all the action really happens
-      void forecast (int noutput_items, gr_vector_int &ninput_items_required);
-
-      int general_work(int noutput_items,
-           gr_vector_int &ninput_items,
-           gr_vector_const_void_star &input_items,
-           gr_vector_void_star &output_items);
+      /*!
+       * \brief Return a shared_ptr to a new instance of dvbt_rx::superframe.
+       *
+       * To avoid accidental use of raw pointers, dvbt_rx::superframe's
+       * constructor is in a private implementation
+       * class. dvbt_rx::superframe::make is the public interface for
+       * creating new instances.
+       */
+      static sptr make();
     };
 
   } // namespace dvbt_rx
 } // namespace gr
 
-#endif /* INCLUDED_DVBT_RX_GPU_VITERBI_IMPL_H */
+#endif /* INCLUDED_DVBT_RX_SUPERFRAME_H */
 

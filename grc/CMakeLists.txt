@@ -21,5 +21,7 @@ install(FILES
     dvbt_rx_sync_cc.xml
     dvbt_rx_myConfig_t.xml
     dvbt_rx_demap.xml
-    dvbt_rx_gpu_viterbi.xml DESTINATION share/gnuradio/grc/blocks
+    dvbt_rx_gpu_viterbi.xml
+    dvbt_rx_descrambler.xml
+    dvbt_rx_superframe.xml DESTINATION share/gnuradio/grc/blocks
 )

@@ -40,7 +40,7 @@ demap_impl::demap_impl() :
 				gr::io_signature::make2(2, 2,
 						sizeof(gr_complex) * config.carriers,
 						sizeof(gr_complex) * config.fft_len),
-				gr::io_signature::make(1, 1, sizeof(char) * bitCount)), eqs_scatteredPilotsInverse(
+				gr::io_signature::make(1, 1, sizeof(char) * config.data_carrier_count)), eqs_scatteredPilotsInverse(
 				std::vector<myBuffer_t>(4)) {
 	eqs_inBufInverse = reinterpret_cast<fftwf_complex*>(fftwf_malloc(
 			sizeof(fftwf_complex) * config.scattered_pilots_count));
@@ -102,6 +102,8 @@ demap_impl::demap_impl() :
 
 		ds_dataIdx[i] = without_spilots;
 	}
+
+	gpu_deint_init();
 }
 
 /*
@@ -114,6 +116,7 @@ demap_impl::~demap_impl() {
 	fftwf_free(eqs_inBufForward);
 	fftwf_free(eqs_outBufForward);
 	fftwf_destroy_plan(eqs_planForward);
+	gpu_deint_free();
 }
 
 // ***************************************************************
@@ -362,9 +365,20 @@ int demap_impl::general_work(int noutput_items, gr_vector_int &ninput_items,
 				config.data_carrier_count);
 
 		auto _dem = demap_update(_mul);
-		auto _deint = deint_update(_dem, _frame);
+//		auto _deint = deint_update(_dem, _frame);
+		std::vector<char> _deint(bitCount);
+		gpu_deinterleave(_dem.data(), _deint.data(), _frame);
 
-		std::copy_n(begin(_deint), bitCount, out + i*bitCount);
+		char *outp = out + i*config.data_carrier_count;
+		int count = 0;
+		for(int j =  0; j < config.data_carrier_count; j++) {
+			*outp=0;
+			for(int k = 5; k >= 0; k--) {
+				*outp |= (_deint[count++] & 1)<< k;
+			}
+			outp++;
+		}
+//		std::copy_n(begin(_deint), bitCount, out + i*bitCount);
 //		std::copy_n(begin(_mul), config.data_carrier_count, out1 + i*config.data_carrier_count);
 	}
 

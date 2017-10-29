@@ -29,6 +29,8 @@
 #include "qa_sync_cc.h"
 #include "qa_demap.h"
 #include "qa_gpu_viterbi.h"
+#include "qa_descrambler.h"
+#include "qa_superframe.h"
 
 CppUnit::TestSuite *
 qa_dvbt_rx::suite()
@@ -37,6 +39,8 @@ qa_dvbt_rx::suite()
   s->addTest(gr::dvbt_rx::qa_sync_cc::suite());
   s->addTest(gr::dvbt_rx::qa_demap::suite());
   s->addTest(gr::dvbt_rx::qa_gpu_viterbi::suite());
+  s->addTest(gr::dvbt_rx::qa_descrambler::suite());
+  s->addTest(gr::dvbt_rx::qa_superframe::suite());
 
   return s;
 }

@@ -39,7 +39,7 @@ typedef std::vector<myReal_t> myBufferR_t;
 typedef std::vector<unsigned char> myBufferB_t;
 typedef std::vector<myInteger_t> myBufferI_t;
 typedef std::deque<myComplex_t> myDelay_t;
-typedef std::vector<bool> myBitset_t;
+typedef std::vector<char> myBitset_t;
 
 /*!
  * \brief <+description+>

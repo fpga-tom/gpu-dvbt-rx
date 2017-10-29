@@ -30,6 +30,8 @@ list(APPEND dvbt_rx_sources
     myConfig_t.cc
     demap_impl.cc
     gpu_viterbi_impl.cc
+    descrambler_impl.cc
+    superframe_impl.cc
 )
 
 set(dvbt_rx_sources "${dvbt_rx_sources}" PARENT_SCOPE)
@@ -67,6 +69,8 @@ include_directories(${CPPUNIT_INCLUDE_DIRS})
 list(APPEND test_dvbt_rx_sources
     ${CMAKE_CURRENT_SOURCE_DIR}/test_dvbt_rx.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/qa_dvbt_rx.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/qa_superframe.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/qa_descrambler.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/qa_gpu_viterbi.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/qa_demap.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/qa_sync_cc.cc

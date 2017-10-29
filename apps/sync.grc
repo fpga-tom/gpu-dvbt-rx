@@ -109,6 +109,57 @@
     </param>
   </block>
   <block>
+    <key>blocks_file_sink</key>
+    <param>
+      <key>append</key>
+      <value>False</value>
+    </param>
+    <param>
+      <key>alias</key>
+      <value></value>
+    </param>
+    <param>
+      <key>comment</key>
+      <value></value>
+    </param>
+    <param>
+      <key>affinity</key>
+      <value></value>
+    </param>
+    <param>
+      <key>_enabled</key>
+      <value>True</value>
+    </param>
+    <param>
+      <key>file</key>
+      <value>/tmp/rx.ts</value>
+    </param>
+    <param>
+      <key>_coordinate</key>
+      <value>(792, 423)</value>
+    </param>
+    <param>
+      <key>_rotation</key>
+      <value>0</value>
+    </param>
+    <param>
+      <key>id</key>
+      <value>blocks_file_sink_0</value>
+    </param>
+    <param>
+      <key>type</key>
+      <value>byte</value>
+    </param>
+    <param>
+      <key>unbuffered</key>
+      <value>False</value>
+    </param>
+    <param>
+      <key>vlen</key>
+      <value>1</value>
+    </param>
+  </block>
+  <block>
     <key>blocks_file_source</key>
     <param>
       <key>alias</key>
@@ -132,7 +183,7 @@
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(136, 175)</value>
+      <value>(112, 103)</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -164,14 +215,10 @@
     </param>
   </block>
   <block>
-    <key>blocks_null_sink</key>
+    <key>blocks_vector_to_stream</key>
     <param>
       <key>alias</key>
       <value></value>
-    </param>
-    <param>
-      <key>bus_conns</key>
-      <value>[[0,],]</value>
     </param>
     <param>
       <key>comment</key>
@@ -187,7 +234,7 @@
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(760, 69)</value>
+      <value>(200, 277)</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -195,19 +242,192 @@
     </param>
     <param>
       <key>id</key>
-      <value>blocks_null_sink_0_0</value>
+      <value>blocks_vector_to_stream_0</value>
     </param>
     <param>
       <key>type</key>
       <value>byte</value>
     </param>
     <param>
-      <key>num_inputs</key>
-      <value>1</value>
+      <key>maxoutbuf</key>
+      <value>0</value>
+    </param>
+    <param>
+      <key>minoutbuf</key>
+      <value>0</value>
+    </param>
+    <param>
+      <key>num_items</key>
+      <value>3024</value>
     </param>
     <param>
       <key>vlen</key>
-      <value>18144</value>
+      <value>1</value>
+    </param>
+  </block>
+  <block>
+    <key>dtv_dvbt_convolutional_deinterleaver</key>
+    <param>
+      <key>alias</key>
+      <value></value>
+    </param>
+    <param>
+      <key>blocks</key>
+      <value>136</value>
+    </param>
+    <param>
+      <key>comment</key>
+      <value></value>
+    </param>
+    <param>
+      <key>affinity</key>
+      <value></value>
+    </param>
+    <param>
+      <key>M</key>
+      <value>17</value>
+    </param>
+    <param>
+      <key>_enabled</key>
+      <value>True</value>
+    </param>
+    <param>
+      <key>_coordinate</key>
+      <value>(176, 423)</value>
+    </param>
+    <param>
+      <key>_rotation</key>
+      <value>0</value>
+    </param>
+    <param>
+      <key>id</key>
+      <value>dtv_dvbt_convolutional_deinterleaver_0</value>
+    </param>
+    <param>
+      <key>maxoutbuf</key>
+      <value>0</value>
+    </param>
+    <param>
+      <key>minoutbuf</key>
+      <value>0</value>
+    </param>
+    <param>
+      <key>I</key>
+      <value>12</value>
+    </param>
+  </block>
+  <block>
+    <key>dtv_dvbt_energy_descramble</key>
+    <param>
+      <key>alias</key>
+      <value></value>
+    </param>
+    <param>
+      <key>nsize</key>
+      <value>8</value>
+    </param>
+    <param>
+      <key>comment</key>
+      <value></value>
+    </param>
+    <param>
+      <key>affinity</key>
+      <value></value>
+    </param>
+    <param>
+      <key>_enabled</key>
+      <value>True</value>
+    </param>
+    <param>
+      <key>_coordinate</key>
+      <value>(600, 437)</value>
+    </param>
+    <param>
+      <key>_rotation</key>
+      <value>0</value>
+    </param>
+    <param>
+      <key>id</key>
+      <value>dtv_dvbt_energy_descramble_0</value>
+    </param>
+    <param>
+      <key>maxoutbuf</key>
+      <value>0</value>
+    </param>
+    <param>
+      <key>minoutbuf</key>
+      <value>0</value>
+    </param>
+  </block>
+  <block>
+    <key>dtv_dvbt_reed_solomon_dec</key>
+    <param>
+      <key>alias</key>
+      <value></value>
+    </param>
+    <param>
+      <key>blocks</key>
+      <value>8</value>
+    </param>
+    <param>
+      <key>comment</key>
+      <value></value>
+    </param>
+    <param>
+      <key>affinity</key>
+      <value></value>
+    </param>
+    <param>
+      <key>_enabled</key>
+      <value>True</value>
+    </param>
+    <param>
+      <key>gfpoly</key>
+      <value>0x11d</value>
+    </param>
+    <param>
+      <key>_coordinate</key>
+      <value>(400, 395)</value>
+    </param>
+    <param>
+      <key>_rotation</key>
+      <value>0</value>
+    </param>
+    <param>
+      <key>id</key>
+      <value>dtv_dvbt_reed_solomon_dec_0</value>
+    </param>
+    <param>
+      <key>k</key>
+      <value>239</value>
+    </param>
+    <param>
+      <key>maxoutbuf</key>
+      <value>0</value>
+    </param>
+    <param>
+      <key>minoutbuf</key>
+      <value>0</value>
+    </param>
+    <param>
+      <key>n</key>
+      <value>255</value>
+    </param>
+    <param>
+      <key>s</key>
+      <value>51</value>
+    </param>
+    <param>
+      <key>m</key>
+      <value>8</value>
+    </param>
+    <param>
+      <key>p</key>
+      <value>2</value>
+    </param>
+    <param>
+      <key>t</key>
+      <value>8</value>
     </param>
   </block>
   <block>
@@ -230,7 +450,7 @@
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(568, 144)</value>
+      <value>(504, 72)</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -269,7 +489,7 @@
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(696, 160)</value>
+      <value>(616, 88)</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -278,6 +498,45 @@
     <param>
       <key>id</key>
       <value>dvbt_rx_gpu_viterbi_0</value>
+    </param>
+    <param>
+      <key>maxoutbuf</key>
+      <value>0</value>
+    </param>
+    <param>
+      <key>minoutbuf</key>
+      <value>0</value>
+    </param>
+  </block>
+  <block>
+    <key>dvbt_rx_superframe</key>
+    <param>
+      <key>alias</key>
+      <value></value>
+    </param>
+    <param>
+      <key>comment</key>
+      <value></value>
+    </param>
+    <param>
+      <key>affinity</key>
+      <value></value>
+    </param>
+    <param>
+      <key>_enabled</key>
+      <value>True</value>
+    </param>
+    <param>
+      <key>_coordinate</key>
+      <value>(376, 280)</value>
+    </param>
+    <param>
+      <key>_rotation</key>
+      <value>0</value>
+    </param>
+    <param>
+      <key>id</key>
+      <value>dvbt_rx_superframe_0</value>
     </param>
     <param>
       <key>maxoutbuf</key>
@@ -308,7 +567,7 @@
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(376, 176)</value>
+      <value>(336, 104)</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -334,6 +593,30 @@
     <sink_key>0</sink_key>
   </connection>
   <connection>
+    <source_block_id>blocks_vector_to_stream_0</source_block_id>
+    <sink_block_id>dvbt_rx_superframe_0</sink_block_id>
+    <source_key>0</source_key>
+    <sink_key>0</sink_key>
+  </connection>
+  <connection>
+    <source_block_id>dtv_dvbt_convolutional_deinterleaver_0</source_block_id>
+    <sink_block_id>dtv_dvbt_reed_solomon_dec_0</sink_block_id>
+    <source_key>0</source_key>
+    <sink_key>0</sink_key>
+  </connection>
+  <connection>
+    <source_block_id>dtv_dvbt_energy_descramble_0</source_block_id>
+    <sink_block_id>blocks_file_sink_0</sink_block_id>
+    <source_key>0</source_key>
+    <sink_key>0</sink_key>
+  </connection>
+  <connection>
+    <source_block_id>dtv_dvbt_reed_solomon_dec_0</source_block_id>
+    <sink_block_id>dtv_dvbt_energy_descramble_0</sink_block_id>
+    <source_key>0</source_key>
+    <sink_key>0</sink_key>
+  </connection>
+  <connection>
     <source_block_id>dvbt_rx_demap_0</source_block_id>
     <sink_block_id>dvbt_rx_gpu_viterbi_0</sink_block_id>
     <source_key>0</source_key>
@@ -341,7 +624,13 @@
   </connection>
   <connection>
     <source_block_id>dvbt_rx_gpu_viterbi_0</source_block_id>
-    <sink_block_id>blocks_null_sink_0_0</sink_block_id>
+    <sink_block_id>blocks_vector_to_stream_0</sink_block_id>
+    <source_key>0</source_key>
+    <sink_key>0</sink_key>
+  </connection>
+  <connection>
+    <source_block_id>dvbt_rx_superframe_0</source_block_id>
+    <sink_block_id>dtv_dvbt_convolutional_deinterleaver_0</sink_block_id>
     <source_key>0</source_key>
     <sink_key>0</sink_key>
   </connection>

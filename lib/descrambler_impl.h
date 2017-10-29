@@ -18,28 +18,29 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef INCLUDED_DVBT_RX_GPU_VITERBI_IMPL_H
-#define INCLUDED_DVBT_RX_GPU_VITERBI_IMPL_H
+#ifndef INCLUDED_DVBT_RX_DESCRAMBLER_IMPL_H
+#define INCLUDED_DVBT_RX_DESCRAMBLER_IMPL_H
 
-#include <dvbt_rx/gpu_viterbi.h>
+#include <dvbt_rx/descrambler.h>
 #include <dvbt_rx/myConfig_t.h>
-#include <viterbi.h>
 
 namespace gr {
   namespace dvbt_rx {
 
-    class gpu_viterbi_impl : public gpu_viterbi
+    class descrambler_impl : public descrambler
     {
      private:
     	myConfig_t config;
-    	const unsigned char d_puncture[4] = { 1,1, 0, 1 };
-    	const myInteger_t d_k = 2;
-    	const myInteger_t d_n = 3;
-    	const myInteger_t noi = 3024; // number of output items
+    	int parentRead[2];
+    	int parentWrite[2];
+
+
+    	myBufferB_t descrambler_update(const myBufferB_t& buf);
+    	unsigned long frame;
 
      public:
-      gpu_viterbi_impl();
-      ~gpu_viterbi_impl();
+      descrambler_impl();
+      ~descrambler_impl();
 
       // Where all the action really happens
       void forecast (int noutput_items, gr_vector_int &ninput_items_required);
@@ -53,5 +54,5 @@ namespace gr {
   } // namespace dvbt_rx
 } // namespace gr
 
-#endif /* INCLUDED_DVBT_RX_GPU_VITERBI_IMPL_H */
+#endif /* INCLUDED_DVBT_RX_DESCRAMBLER_IMPL_H */
 
