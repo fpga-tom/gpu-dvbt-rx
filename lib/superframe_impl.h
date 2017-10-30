@@ -29,7 +29,7 @@ namespace dvbt_rx {
 
 class superframe_impl: public superframe {
 private:
-	myConfig_t config;
+	static myConfig_t config;
 	std::deque<bool> q0, q1, q2, q3, q4, q5, q6, q7, q8;
 	myInteger_t synchronize(const myBufferB_t& out);
 	int isInSync;

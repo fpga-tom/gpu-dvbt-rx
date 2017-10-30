@@ -228,7 +228,7 @@ myBuffer_t sync_cc_impl::sync_update(const myBuffer_t& in,
 	}
 
 	bool locked = !(currentLock >= lockCount + 5
-			&& std::abs(peak - peakFind) > 20);
+			&& std::abs(peak - peakFind) > 2000);
 	if (!locked) {
 		std::cerr << "Lost sync " << fineTiming << " " << peak << " "
 				<< peakFind << std::endl;

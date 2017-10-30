@@ -10,8 +10,8 @@
 #define NUM_STATES 64
 #define NUM_INPUT_SYMBOLS 2
 #define NUM_OUTPUT_SYMBOLS 4
-#define NUM_BLOCKS (189)
-#define TRACEBACK (128)
+#define NUM_BLOCKS (189*2)
+#define TRACEBACK (64)
 #define NUM_H 36288
 #define NUM_D_BLOCKS 378
 #define NUM_D_THREADS 96
@@ -113,7 +113,7 @@ __global__ void traceback(char *decData,
 //	}
 
 	for (int _tms = BLOCK_LEN - 1; _tms >= BLOCK_LEN - NUM_L; _tms--) {
-			minIdx = (*pm)[block][_tms][minIdx].prev;
+		minIdx = (*pm)[block][_tms][minIdx].prev;
 	}
 
 	for (int _tms = BLOCK_LEN - NUM_L - 1; _tms >= NUM_L; _tms--) {
@@ -193,7 +193,10 @@ void gpu_viterbi_free() {
 
 void gpu_viterbi_decode(const char* data, char* output) {
 
-	static char encData_tmp[(BLOCK_LEN) * NUM_BLOCKS] = {0,};
+	static char encData_tmp0[(BLOCK_LEN) * NUM_BLOCKS] = { 0, };
+	static char encData_tmp1[(BLOCK_LEN) * NUM_BLOCKS] = { 0, };
+	static char* encData_tmp = encData_tmp0;
+
 	char decData_tmp[TRACEBACK * NUM_BLOCKS];
 
 	for (int b = 0; b < NUM_BLOCKS; b++) {
@@ -208,9 +211,24 @@ void gpu_viterbi_decode(const char* data, char* output) {
 		}
 		if (b > 0) {
 //			memcpy(&encData_tmp[(b-1)*BLOCK_LEN + TRACEBACK + NUM_L], &encData_tmp[b*BLOCK_LEN + NUM_L], NUM_L);
-			memcpy(&encData_tmp[(b) * (BLOCK_LEN)], &encData_tmp[(b - 1)
-						* (BLOCK_LEN) + TRACEBACK], NUM_L);
+			memcpy(&encData_tmp[(b) * (BLOCK_LEN)],
+					&encData_tmp[(b - 1) * (BLOCK_LEN) + TRACEBACK], NUM_L);
+		} else {
+			if(encData_tmp == encData_tmp0) {
+				memcpy(&encData_tmp[0], &encData_tmp1[(NUM_BLOCKS-1)*BLOCK_LEN + TRACEBACK], NUM_L);
+			} else {
+				memcpy(&encData_tmp[0], &encData_tmp0[(NUM_BLOCKS-1)*BLOCK_LEN + TRACEBACK], NUM_L);
+			}
 		}
+	}
+	if (encData_tmp == encData_tmp0) {
+		memcpy(&encData_tmp1[NUM_BLOCKS * BLOCK_LEN - NUM_L],
+				&encData_tmp0[NUM_L], NUM_L);
+		encData_tmp = encData_tmp1;
+	} else {
+		memcpy(&encData_tmp0[NUM_BLOCKS * BLOCK_LEN - NUM_L],
+				&encData_tmp1[NUM_L], NUM_L);
+		encData_tmp = encData_tmp0;
 	}
 
 	cudaMemcpy(encData, encData_tmp, (BLOCK_LEN) * NUM_BLOCKS,
@@ -226,8 +244,6 @@ void gpu_viterbi_decode(const char* data, char* output) {
 	cudaMemcpy(decData_tmp, decData, TRACEBACK * NUM_BLOCKS,
 			cudaMemcpyDeviceToHost);
 
-	memcpy(encData_tmp, &encData_tmp[(NUM_BLOCKS-1)*BLOCK_LEN + TRACEBACK], NUM_L);
-
 	int count = 0;
 	for (int i = 0; i < TRACEBACK * NUM_BLOCKS; i += 8) {
 		output[i >> 3] = 0;
@@ -235,7 +251,6 @@ void gpu_viterbi_decode(const char* data, char* output) {
 			output[i >> 3] |= (decData_tmp[count++] & 1) << j;
 		}
 	}
-
 }
 
 void gpu_deinterleave(const char* data, char* output, int frame) {
