@@ -3,7 +3,7 @@
 ##################################################
 # GNU Radio Python Flow Graph
 # Title: Top Block
-# Generated: Mon Oct 30 21:06:16 2017
+# Generated: Wed Nov  1 13:17:39 2017
 ##################################################
 
 if __name__ == '__main__':
@@ -26,7 +26,6 @@ from gnuradio import iio
 from gnuradio import qtgui
 from gnuradio.eng_option import eng_option
 from gnuradio.filter import firdes
-from grc_gnuradio import blks2 as grc_blks2
 from optparse import OptionParser
 import dvbt_rx
 import sip
@@ -73,19 +72,19 @@ class top_block(gr.top_block, Qt.QWidget):
                 fractional_bw=None,
         )
         self.qtgui_freq_sink_x_0 = qtgui.freq_sink_c(
-        	256, #size
+        	512, #size
         	firdes.WIN_BLACKMAN_hARRIS, #wintype
         	0, #fc
         	samp_rate, #bw
         	"", #name
         	1 #number of inputs
         )
-        self.qtgui_freq_sink_x_0.set_update_time(0.20)
+        self.qtgui_freq_sink_x_0.set_update_time(0.10)
         self.qtgui_freq_sink_x_0.set_y_axis(-14, 40)
         self.qtgui_freq_sink_x_0.set_trigger_mode(qtgui.TRIG_MODE_FREE, 0.0, 0, "")
         self.qtgui_freq_sink_x_0.enable_autoscale(False)
-        self.qtgui_freq_sink_x_0.enable_grid(True)
-        self.qtgui_freq_sink_x_0.set_fft_average(1.0)
+        self.qtgui_freq_sink_x_0.enable_grid(False)
+        self.qtgui_freq_sink_x_0.set_fft_average(0.2)
         self.qtgui_freq_sink_x_0.enable_control_panel(False)
         
         if not True:
@@ -113,7 +112,7 @@ class top_block(gr.top_block, Qt.QWidget):
         
         self._qtgui_freq_sink_x_0_win = sip.wrapinstance(self.qtgui_freq_sink_x_0.pyqwidget(), Qt.QWidget)
         self.top_layout.addWidget(self._qtgui_freq_sink_x_0_win)
-        self.iio_fmcomms2_source_0 = iio.fmcomms2_source("192.168.1.10", 474000000, samp_rate, 1 - 1, 8000000, True, True, False, False, 0x200000, True, True, True, "fast_attack", 94.0, "fast_attack", 94.0, "A_BALANCED", "")
+        self.iio_fmcomms2_source_0 = iio.fmcomms2_source("192.168.1.10", 706000000, 10000000, 1 - 1, 8000000, True, True, False, False, 3360000, True, True, True, "fast_attack", 64.0, "fast_attack", 64.0, "A_BALANCED", "")
         self.dvbt_rx_sync_cc_0 = dvbt_rx.sync_cc()
         self.dvbt_rx_superframe_0 = dvbt_rx.superframe()
         self.dvbt_rx_gpu_viterbi_0 = dvbt_rx.gpu_viterbi()
@@ -122,29 +121,24 @@ class top_block(gr.top_block, Qt.QWidget):
         self.dtv_dvbt_energy_descramble_0 = dtv.dvbt_energy_descramble(8)
         self.dtv_dvbt_convolutional_deinterleaver_0 = dtv.dvbt_convolutional_deinterleaver(136, 12, 17)
         self.blocks_vector_to_stream_0 = blocks.vector_to_stream(gr.sizeof_char*1, 3024)
+        self.blocks_udp_sink_0 = blocks.udp_sink(gr.sizeof_char*1, "172.20.0.1", 10001, 1472, True)
         self.blocks_stream_to_vector_0 = blocks.stream_to_vector(gr.sizeof_gr_complex*1, 10240)
         self.blocks_short_to_float_1 = blocks.short_to_float(1, 1)
         self.blocks_short_to_float_0 = blocks.short_to_float(1, 1)
         self.blocks_float_to_complex_0 = blocks.float_to_complex(1)
-        self.blocks_file_source_0 = blocks.file_source(gr.sizeof_gr_complex*1, "/tmp/dvb_res_today.cfile", True)
-        self.blks2_tcp_sink_0 = grc_blks2.tcp_sink(
-        	itemsize=gr.sizeof_char*1,
-        	addr="172.20.0.1",
-        	port=10001,
-        	server=False,
-        )
 
         ##################################################
         # Connections
         ##################################################
-        self.connect((self.blocks_file_source_0, 0), (self.blocks_stream_to_vector_0, 0))    
+        self.msg_connect((self.dvbt_rx_sync_cc_0, 'restartSync'), (self.dvbt_rx_superframe_0, 'restartSync'))    
+        self.connect((self.blocks_float_to_complex_0, 0), (self.qtgui_freq_sink_x_0, 0))    
         self.connect((self.blocks_float_to_complex_0, 0), (self.rational_resampler_xxx_0, 0))    
         self.connect((self.blocks_short_to_float_0, 0), (self.blocks_float_to_complex_0, 0))    
         self.connect((self.blocks_short_to_float_1, 0), (self.blocks_float_to_complex_0, 1))    
         self.connect((self.blocks_stream_to_vector_0, 0), (self.dvbt_rx_sync_cc_0, 0))    
         self.connect((self.blocks_vector_to_stream_0, 0), (self.dvbt_rx_superframe_0, 0))    
         self.connect((self.dtv_dvbt_convolutional_deinterleaver_0, 0), (self.dtv_dvbt_reed_solomon_dec_0, 0))    
-        self.connect((self.dtv_dvbt_energy_descramble_0, 0), (self.blks2_tcp_sink_0, 0))    
+        self.connect((self.dtv_dvbt_energy_descramble_0, 0), (self.blocks_udp_sink_0, 0))    
         self.connect((self.dtv_dvbt_reed_solomon_dec_0, 0), (self.dtv_dvbt_energy_descramble_0, 0))    
         self.connect((self.dvbt_rx_demap_0, 0), (self.dvbt_rx_gpu_viterbi_0, 0))    
         self.connect((self.dvbt_rx_gpu_viterbi_0, 0), (self.blocks_vector_to_stream_0, 0))    
@@ -153,7 +147,7 @@ class top_block(gr.top_block, Qt.QWidget):
         self.connect((self.dvbt_rx_sync_cc_0, 0), (self.dvbt_rx_demap_0, 1))    
         self.connect((self.iio_fmcomms2_source_0, 0), (self.blocks_short_to_float_0, 0))    
         self.connect((self.iio_fmcomms2_source_0, 1), (self.blocks_short_to_float_1, 0))    
-        self.connect((self.rational_resampler_xxx_0, 0), (self.qtgui_freq_sink_x_0, 0))    
+        self.connect((self.rational_resampler_xxx_0, 0), (self.blocks_stream_to_vector_0, 0))    
 
     def closeEvent(self, event):
         self.settings = Qt.QSettings("GNU Radio", "top_block")
@@ -166,7 +160,6 @@ class top_block(gr.top_block, Qt.QWidget):
 
     def set_samp_rate(self, samp_rate):
         self.samp_rate = samp_rate
-        self.iio_fmcomms2_source_0.set_params(474000000, self.samp_rate, 8000000, True, True, True, "fast_attack", 94.0, "fast_attack", 94.0, "A_BALANCED")
         self.qtgui_freq_sink_x_0.set_frequency_range(0, self.samp_rate)
 
 

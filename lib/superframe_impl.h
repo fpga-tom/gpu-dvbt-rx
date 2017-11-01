@@ -33,10 +33,12 @@ private:
 	std::deque<bool> q0, q1, q2, q3, q4, q5, q6, q7, q8;
 	myInteger_t synchronize(const myBufferB_t& out);
 	int isInSync;
+	bool restartSync;
 public:
 	superframe_impl();
 	~superframe_impl();
 
+	void restartSyncHandler(pmt::pmt_t msg);
 	// Where all the action really happens
 	void forecast(int noutput_items, gr_vector_int &ninput_items_required);
 

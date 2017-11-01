@@ -25,6 +25,8 @@
 #include <dvbt_rx/myConfig_t.h>
 #include <viterbi.h>
 
+#define Blocks 1
+
 namespace gr {
   namespace dvbt_rx {
 
@@ -35,7 +37,7 @@ namespace gr {
     	const unsigned char d_puncture[4] = { 1,1, 0, 1 };
     	const myInteger_t d_k = 2;
     	const myInteger_t d_n = 3;
-    	const myInteger_t noi = 3024; // number of output items
+    	const myInteger_t noi = Blocks*3024; // number of output items
 
      public:
       gpu_viterbi_impl();

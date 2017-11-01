@@ -37,7 +37,7 @@ superframe::sptr superframe::make() {
  */
 superframe_impl::superframe_impl() :
 		gr::block("superframe", gr::io_signature::make(1, 1, sizeof(char)),
-				gr::io_signature::make(1, 1, sizeof(char))), isInSync(-1) {
+				gr::io_signature::make(1, 1, sizeof(char))), isInSync(-1), restartSync(false) {
 	q0 = std::deque<bool>(204 * 8);
 	q1 = std::deque<bool>(204 * 7);
 	q2 = std::deque<bool>(204 * 6);
@@ -46,12 +46,20 @@ superframe_impl::superframe_impl() :
 	q5 = std::deque<bool>(204 * 3);
 	q6 = std::deque<bool>(204 * 2);
 	q7 = std::deque<bool>(204 * 1);
+
+	 message_port_register_in(pmt::mp("restartSync"));
+	 set_msg_handler(pmt::mp("restartSync"), boost::bind(&superframe_impl::restartSyncHandler, this, _1));
 }
 
 /*
  * Our virtual destructor.
  */
 superframe_impl::~superframe_impl() {
+}
+
+void superframe_impl::restartSyncHandler(pmt::pmt_t msg) {
+	restartSync = true;
+	std::cout << "restartSync" << std::endl;
 }
 
 myInteger_t superframe_impl::synchronize(const myBufferB_t& out) {
@@ -105,10 +113,12 @@ int superframe_impl::general_work(int noutput_items,
 	int oi = 0;
 
 	myBufferB_t d_in(in, in + noutput_items);
+
 	if (isInSync < 0) {
 		isInSync = synchronize(d_in);
 	}
 	if (isInSync >= 0) {
+		restartSync = false;
 		oi = noutput_items - isInSync;
 		std::copy(begin(d_in) + isInSync, end(d_in), out);
 		isInSync = 0;

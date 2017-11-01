@@ -60,8 +60,8 @@ sync_cc_impl::sync_cc_impl() :
 			sizeof(fftwf_complex) * config.fft_len));
 
 	fft_plan = fftwf_plan_dft_1d(config.fft_len, fft_inBuf, fft_outBuf,
-			FFTW_FORWARD,
-			FFTW_ESTIMATE);
+	FFTW_FORWARD,
+	FFTW_ESTIMATE);
 
 	eq_inBufInverse = reinterpret_cast<fftwf_complex*>(fftwf_malloc(
 			sizeof(fftwf_complex) * config.continual_pilots_count));
@@ -85,6 +85,8 @@ sync_cc_impl::sync_cc_impl() :
 			[](myComplex_t a, myComplex_t b) {
 				return std::conj(a) * b;
 			});
+
+	message_port_register_out(pmt::mp("restartSync"));
 }
 
 /*
@@ -506,6 +508,10 @@ int sync_cc_impl::general_work(int noutput_items, gr_vector_int &ninput_items,
 		std::copy(begin(_fft), end(_fft), out + i * config.fft_len);
 		std::copy(begin(std::get < 0 > (_eq)), end(std::get < 0 > (_eq)),
 				eq_out + i * config.carriers);
+	}
+
+	if (!locked) {
+		message_port_pub(pmt::mp("restartSync"), pmt::from_bool(locked));
 	}
 
 	// Tell runtime system how many input items we consumed on

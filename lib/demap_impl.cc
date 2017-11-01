@@ -40,7 +40,8 @@ demap_impl::demap_impl() :
 				gr::io_signature::make2(2, 2,
 						sizeof(gr_complex) * config.carriers,
 						sizeof(gr_complex) * config.fft_len),
-				gr::io_signature::make(1, 1, sizeof(char) * config.data_carrier_count)), eqs_scatteredPilotsInverse(
+				gr::io_signature::make(1, 1,
+						sizeof(char) * config.data_carrier_count)), eqs_scatteredPilotsInverse(
 				std::vector<myBuffer_t>(4)) {
 	eqs_inBufInverse = reinterpret_cast<fftwf_complex*>(fftwf_malloc(
 			sizeof(fftwf_complex) * config.scattered_pilots_count));
@@ -73,7 +74,6 @@ demap_impl::demap_impl() :
 		}
 	}
 
-
 	ds_dataIdx = std::vector<std::vector<int>>(4);
 	for (auto i { 0 }; i < 4; i++) {
 
@@ -83,8 +83,7 @@ demap_impl::demap_impl() :
 
 		auto without_tps = std::vector<int>();
 		std::set_difference(begin(tmp), end(tmp), begin(config.tps),
-				end(config.tps),
-				inserter(without_tps, begin(without_tps)));
+				end(config.tps), inserter(without_tps, begin(without_tps)));
 
 		auto without_cpilots = std::vector<int>();
 
@@ -94,8 +93,7 @@ demap_impl::demap_impl() :
 
 		auto without_spilots = std::vector<int>();
 
-		std::set_difference(begin(without_cpilots),
-				end(without_cpilots),
+		std::set_difference(begin(without_cpilots), end(without_cpilots),
 				begin(config.scattered_pilots[i]),
 				end(config.scattered_pilots[i]),
 				inserter(without_spilots, begin(without_spilots)));
@@ -168,7 +166,6 @@ myBuffer_t demap_impl::eqs_selSpilots(const myBuffer_t& in, int frame) {
 	return result;
 }
 
-
 myBuffer_t demap_impl::eqs_update(const myBuffer_t& in, int frame) {
 	auto spilots = eqs_selSpilots(in, frame);
 
@@ -179,18 +176,20 @@ myBuffer_t demap_impl::eqs_update(const myBuffer_t& in, int frame) {
 			config.scattered_pilots_count);
 
 	// interpolate cir
-	fftwf_execute (eqs_planInverse);
+	fftwf_execute(eqs_planInverse);
 
 	std::transform(reinterpret_cast<myComplex_t*>(eqs_outBufInverse),
 			reinterpret_cast<myComplex_t*>(eqs_outBufInverse)
 					+ config.scattered_pilots_count,
-			reinterpret_cast<myComplex_t*>(eqs_outBufInverse), [&](myComplex_t a) {
+			reinterpret_cast<myComplex_t*>(eqs_outBufInverse),
+			[&](myComplex_t a) {
 				return a / (float)config.scattered_pilots_count;
 			});
 
 	// zero input buffer
 	std::fill(reinterpret_cast<myComplex_t*>(eqs_inBufForward),
-			reinterpret_cast<myComplex_t*>(eqs_inBufForward) + config.carriers, 0);
+			reinterpret_cast<myComplex_t*>(eqs_inBufForward) + config.carriers,
+			0);
 
 	int cc = config.scattered_pilots_count / 2;
 	// align data
@@ -205,7 +204,7 @@ myBuffer_t demap_impl::eqs_update(const myBuffer_t& in, int frame) {
 					- cc);
 
 	// execute interpolation
-	fftwf_execute (eqs_planForward);
+	fftwf_execute(eqs_planForward);
 
 	// copy usefull carriers
 	auto tmp = myBuffer_t(config.carriers);
@@ -230,13 +229,11 @@ myBuffer_t demap_impl::eqs_update(const myBuffer_t& in, int frame) {
 // EQ SCATTERED END
 // ***************************************************************
 
-
 // ***************************************************************
 // DS START
 // ***************************************************************
 
-myBuffer_t demap_impl::ds_update(const myBuffer_t& in,
-		int frame) {
+myBuffer_t demap_impl::ds_update(const myBuffer_t& in, int frame) {
 	assert(in.size() == config.carriers);
 	auto result = myBuffer_t(config.data_carrier_count);
 
@@ -248,11 +245,9 @@ myBuffer_t demap_impl::ds_update(const myBuffer_t& in,
 	return result;
 }
 
-
 // ***************************************************************
 // DS END
 // ***************************************************************
-
 
 // ***************************************************************
 // DEMAP START
@@ -277,10 +272,9 @@ int demap_impl::demap(const myComplex_t& complex, int depth) {
 	return result;
 }
 
-
 myBitset_t demap_impl::demap_update(const myBuffer_t& complex) {
 	assert(complex.size() == config.data_carrier_count);
-	auto result = myBitset_t (bitCount);
+	auto result = myBitset_t(bitCount);
 	auto it { 0 };
 	for (auto c : complex) {
 		auto d = demap(c, 0);
@@ -296,7 +290,6 @@ myBitset_t demap_impl::demap_update(const myBuffer_t& complex) {
 // ***************************************************************
 // DEMAP END
 // ***************************************************************
-
 
 // ***************************************************************
 // DEINT START
@@ -353,8 +346,10 @@ int demap_impl::general_work(int noutput_items, gr_vector_int &ninput_items,
 	auto coeff = lv_cmake(std::sqrt(42.0f), 0.f);
 
 	for (int i = 0; i < noutput_items; i++) {
-		myBuffer_t d_eq(in0 + i * config.carriers, in0 + i * config.carriers + config.carriers);
-		myBuffer_t d_fft(in1 + i * config.fft_len, in1 + i * config.fft_len + config.fft_len);
+		myBuffer_t d_eq(in0 + i * config.carriers,
+				in0 + i * config.carriers + config.carriers);
+		myBuffer_t d_fft(in1 + i * config.fft_len,
+				in1 + i * config.fft_len + config.fft_len);
 		auto _frame = frameNum(d_eq);
 
 		auto _eqs = eqs_update(d_fft, _frame);
@@ -365,20 +360,33 @@ int demap_impl::general_work(int noutput_items, gr_vector_int &ninput_items,
 				config.data_carrier_count);
 
 		auto _dem = demap_update(_mul);
-//		auto _deint = deint_update(_dem, _frame);
+#if 1
+		auto _deint = deint_update(_dem, _frame);
+//		std::copy_n(begin(_deint), bitCount, out + i*bitCount);
+		char *outp = out + i * config.data_carrier_count;
+		int count = 0;
+		for (int j = 0; j < config.data_carrier_count; j++) {
+			*outp = 0;
+			for (int k = 5; k >= 0; k--) {
+				*outp |= (_deint[count++] & 1) << k;
+			}
+			outp++;
+		}
+#else
+
 		std::vector<char> _deint(bitCount);
 		gpu_deinterleave(_dem.data(), _deint.data(), _frame);
 
 		char *outp = out + i*config.data_carrier_count;
 		int count = 0;
-		for(int j =  0; j < config.data_carrier_count; j++) {
+		for(int j = 0; j < config.data_carrier_count; j++) {
 			*outp=0;
 			for(int k = 5; k >= 0; k--) {
 				*outp |= (_deint[count++] & 1)<< k;
 			}
 			outp++;
 		}
-//		std::copy_n(begin(_deint), bitCount, out + i*bitCount);
+#endif
 //		std::copy_n(begin(_mul), config.data_carrier_count, out1 + i*config.data_carrier_count);
 	}
 
